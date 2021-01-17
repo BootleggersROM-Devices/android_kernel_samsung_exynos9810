@@ -16,6 +16,16 @@ ccflags-y += -nostdlib -Wl,-soname=linux-vdso.so.1 \
 		$(call cc-ldoption, -Wl$(comma)--hash-style=sysv)
 ccflags-y += $(DISABLE_LTO)
 
+# Force -O3 (else -O2) to avoid libgcc dependencies
+CFLAGS_REMOVE_vgettimeofday.o = -pg -Os
+CFLAGS_vgettimeofday.o = -fPIC
+ifeq ($(cc-name),clang)
+CFLAGS_vgettimeofday.o = -O3
+else
+CFLAGS_vgettimeofday.o = -O2
+CFLAGS_vgettimeofday.o += -mcmodel=tiny
+endif
+
 # Disable gcov profiling for VDSO code
 GCOV_PROFILE := n
 
